@@ -1343,14 +1343,24 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
     Object.defineProperties(o, {
       width: {
         get: function() {
-          return ga.canvas.ctx.measureText(o.content).width;
+          /** 修复更换字体后宽度测量不正确的问题 */
+          ga.canvas.ctx.save()
+          ga.canvas.ctx.font = o.font
+          var width = ga.canvas.ctx.measureText(o.content).width
+          ga.canvas.ctx.restore()
+          return width;
         },
         enumerable: true,
         configurable: true
       },
       height: {
         get: function() {
-          return ga.canvas.ctx.measureText("M").width;
+           /** 修复更换字体后高度测量不正确的问题 */
+           ga.canvas.ctx.save()
+           ga.canvas.ctx.font = o.font
+           var height = ga.canvas.ctx.measureText("M").width
+           ga.canvas.ctx.restore()
+          return height;
         },
         enumerable: true,
         configurable: true
@@ -1371,11 +1381,11 @@ GA.create = function(width, height, setup, assetsToLoad, load) {
       ctx.fillStyle = o.fillStyle;
 
       //Measure the width and height of the text
-      if (o.width === 0) o.width = ctx.measureText(o.content).width;
-      if (o.height === 0) o.height = ctx.measureText("M").width;
       ctx.translate(-o.width * o.pivotX, -o.height * o.pivotY)
       ctx.font = o.font;
       ctx.textBaseline = o.textBaseline;
+      if (o.width === 0) o.width = ctx.measureText(o.content).width;
+      if (o.height === 0) o.height = ctx.measureText("M").width;
       ctx.fillText(
         o.content,
         0,
